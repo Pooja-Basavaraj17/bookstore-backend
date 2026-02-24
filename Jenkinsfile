@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+        sonarRunner 'SonarScanner'
+    }
+
     stages {
 
         stage('Build') {
@@ -13,11 +17,10 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube') {
                     sh '''
-                    /var/jenkins_home/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarScanner/bin/sonar-scanner \
+                    sonar-scanner \
                     -Dsonar.projectKey=bookstore-app \
                     -Dsonar.sources=. \
-                    -Dsonar.host.url=http://host.docker.internal:8081 \
-                    -Dsonar.login=sqa_7df9fa7e1fff70ebcd6bf5e23ddd63f9345a4c16
+                    -Dsonar.host.url=http://host.docker.internal:8081
                     '''
                 }
             }
