@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        sonarRunner 'SonarScanner'
-    }
-
     stages {
 
         stage('Build') {
@@ -17,10 +13,11 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube') {
                     sh '''
-                    sonar-scanner \
+                    npx sonar-scanner \
                     -Dsonar.projectKey=bookstore-app \
                     -Dsonar.sources=. \
-                    -Dsonar.host.url=http://host.docker.internal:8081
+                    -Dsonar.host.url=$SONAR_HOST_URL \
+                    -Dsonar.login=$SONAR_AUTH_TOKEN
                     '''
                 }
             }
