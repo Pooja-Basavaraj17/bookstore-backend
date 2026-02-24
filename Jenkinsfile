@@ -13,7 +13,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube') {
                     sh '''
-                    npx sonar-scanner \
+                    sonar-scanner \
                     -Dsonar.projectKey=bookstore-app \
                     -Dsonar.sources=. \
                     -Dsonar.host.url=$SONAR_HOST_URL \
