@@ -9,15 +9,16 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh '''
-                    sonar-scanner \
-                    -Dsonar.projectKey=bookstore-app \
-                    -Dsonar.sources=. \
-                    -Dsonar.host.url=http://sonarqube:9000 \
-                    -Dsonar.login=$SONAR_AUTH_TOKEN
-                    '''
+    steps {
+        withSonarQubeEnv('SonarQube') {
+            script {
+                def scannerHome = tool 'SonarScanner'
+                sh """
+                ${scannerHome}/bin/sonar-scanner \
+                -Dsonar.projectKey=bookstore-app \
+                -Dsonar.sources=. \
+                -Dsonar.host.url=http://sonarqube:9000
+                """
                 }
             }
         }
