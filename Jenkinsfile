@@ -18,12 +18,13 @@ pipeline {
                         ${scannerHome}/bin/sonar-scanner \
                         -Dsonar.projectKey=bookstore-app \
                         -Dsonar.sources=. \
-                        -Dsonar.host.url=http://host.docker.internal:9000
+                        -Dsonar.host.url=$SONAR_HOST_URL \
+                        -Dsonar.login=$SONAR_AUTH_TOKEN
                         """
                     }
                 }
             }
-        }   // 👈 THIS was missing
+        }
 
         stage('Run') {
             steps {
