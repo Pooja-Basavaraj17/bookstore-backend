@@ -50,10 +50,40 @@ function authenticateToken(req, res, next) {
 }
 
 // ================= REGISTER =================
+//app.post("/register", async (req, res) => {
+  //const { name, email, password } = req.body;
+
+  //try {
+    //const hashedPassword = await bcrypt.hash(password, 10);
+
+    //await db.query(
+      //"INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
+      //[name, email, hashedPassword]
+    //);
+
+    r//es.json({ message: "User Registered Successfully" });
+
+  //} catch (err) {
+    //console.error(err);
+    //res.status(500).json({ message: "Registration Failed" });
+  //}
+//});
+
+// ================= REGISTER =================
 app.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
 
   try {
+    // Check if email already exists
+    const [existingUser] = await db.query(
+      "SELECT * FROM users WHERE email = ?",
+      [email]
+    );
+
+    if (existingUser.length > 0) {
+      return res.status(400).json({ message: "Email already registered" });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await db.query(
