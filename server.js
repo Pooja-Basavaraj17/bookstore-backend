@@ -61,7 +61,7 @@ function authenticateToken(req, res, next) {
       //[name, email, hashedPassword]
     //);
 
-    r//es.json({ message: "User Registered Successfully" });
+    //res.json({ message: "User Registered Successfully" });
 
   //} catch (err) {
     //console.error(err);
