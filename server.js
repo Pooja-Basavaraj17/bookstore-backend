@@ -10,7 +10,9 @@ app.use(cors());
 app.use(express.json()); // for JSON (Postman)
 app.use(express.urlencoded({ extended: true })); // for HTML form
 
-
+app.get("/", (req, res) => {
+  res.send("Backend is running 🚀");
+});
 //const JWT_SECRET = "mysecretkey"; // later move to .env
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -47,6 +49,13 @@ function authenticateToken(req, res, next) {
     req.user = user;
     next();
   });
+}
+
+function authorizeAdmin(req, res, next) {
+  if (req.user.role !== "admin") {
+    return res.status(403).json({ message: "Admin Access Only" });
+  }
+  next();
 }
 
 // ================= REGISTER =================
@@ -133,7 +142,7 @@ app.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid Password" });
 
     const token = jwt.sign(
-      { id: user.id, email: user.email },
+      { id: user.id, email: user.email, role: user.role },
       JWT_SECRET,
       { expiresIn: "1h" }
     );
@@ -159,7 +168,7 @@ app.get("/books", async (req, res) => {
 });
 
 // ================= ADD BOOK (PROTECTED) =================
-app.post("/books", authenticateToken, async (req, res) => {
+app.post("/books", authenticateToken, authorizeAdmin, async (req, res) => {
   const { title, author, price } = req.body;
 
   try {
@@ -177,7 +186,7 @@ app.post("/books", authenticateToken, async (req, res) => {
 });
 
 // ================= UPDATE BOOK (PROTECTED) =================
-app.put("/books/:id", authenticateToken, async (req, res) => {
+app.put("/books/:id", authenticateToken, authorizeAdmin, async (req, res) => {
   const { title, author, price } = req.body;
 
   try {
@@ -195,7 +204,7 @@ app.put("/books/:id", authenticateToken, async (req, res) => {
 });
 
 // ================= DELETE BOOK (PROTECTED) =================
-app.delete("/books/:id", authenticateToken, async (req, res) => {
+app.delete("/books/:id", authenticateToken, authorizeAdmin, async (req, res) => {
   try {
     await db.query(
       "DELETE FROM books WHERE id=?",
@@ -217,8 +226,9 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
+
 // ================= SIMPLE WEB UI =================
-app.get("/ui", async (req, res) => {
+app.get("/ui", authenticateToken, authorizeAdmin, async (req, res) => {
   const [books] = await db.query("SELECT * FROM books");
 
   let html = `
@@ -285,7 +295,7 @@ app.get("/ui", async (req, res) => {
 });
 
 // ===== UI ADD =====
-app.post("/ui/add", async (req, res) => {
+app.post("/ui/add", authenticateToken, authorizeAdmin, async (req, res) => {
   const { title, author, price } = req.body;
   await db.query(
     "INSERT INTO books (title, author, price) VALUES (?, ?, ?)",
@@ -295,7 +305,7 @@ app.post("/ui/add", async (req, res) => {
 });
 
 // ===== UI DELETE =====
-app.post("/ui/delete/:id", async (req, res) => {
+app.post("/ui/delete/:id", authenticateToken, authorizeAdmin, async (req, res) => {
   await db.query("DELETE FROM books WHERE id=?", [req.params.id]);
   res.redirect("/ui");
 });
@@ -331,4 +341,9 @@ app.post("/ui/update/:id", async (req, res) => {
   res.redirect("/ui");
 });
 
+/* ================= START SERVER ================= */
+//const PORT = process.env.PORT || 3000;
 
+//app.listen(PORT, () => {
+  //console.log(`Server running on port ${PORT}`);
+//});
